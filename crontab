@@ -1,0 +1,4 @@
+0 8 * * * root /backup.sh 1>> /backups/backup.log 2>> /backups/backup.log
+
+# Use 0 8 * * * for 8AM UTC every day: http://everytimezone.com/#2015-3-27,-240,cn3
+# Use * * * * * to backup every minute during development.
