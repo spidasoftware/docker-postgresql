@@ -3,9 +3,8 @@
 # Original version of this script can be found here:
 # https://wiki.postgresql.org/wiki/Automated_Backup_on_Linux
 
-##############################
-## POSTGRESQL BACKUP CONFIG ##
-##############################
+set -u # Treat unset variables as an error when substituting.
+PGPASSWORD=$POSTGRES_PASSWORD
 
 # This dir will be created if it doesn't exist.
 BACKUP_DIR=/backups/
@@ -13,10 +12,6 @@ BAK_LOG=$BACKUP_DIR/backup.log
 
 # Optional hostname to adhere to pg_hba policies.  Will default to "localhost" if none specified.
 HOSTNAME="localhost"
-
-# Optional username to connect to database as.  Will default to "postgres" if none specified.
-USERNAME=$POSTGRES_USER
-PGPASSWORD=$POSTGRES_PASSWORD
 
 # Number of days to keep daily backups
 DAYS_TO_KEEP=7
@@ -54,16 +49,15 @@ fi;
 cd $PGDATA
 
 #Figure out which databases to backup
-DATABASE=minmaster
-echo "$(date) Custom backup of $DATABASE"
+echo "$(date) Custom backup of $POSTGRES_DATABASE"
 
 # Will produce a custom-format backup
 # http://zevross.com/blog/2014/06/11/use-postgresqls-custom-format-to-efficiently-backup-and-restore-tables/
-if ! pg_dump -Fc -h $HOSTNAME -U $USERNAME $DATABASE -f $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress; then
-	echo "[!!ERROR!!] Failed to produce custom backup database $DATABASE"
+if ! pg_dump -Fc -h $HOSTNAME -U $POSTGRES_USER $POSTGRES_DATABASE -f $FINAL_BACKUP_DIR"$POSTGRES_DATABASE".custom.in_progress; then
+	echo "[!!ERROR!!] Failed to produce custom backup database $POSTGRES_DATABASE"
 else
-	mv $FINAL_BACKUP_DIR"$DATABASE".custom.in_progress $FINAL_BACKUP_DIR"$DATABASE".custom
-	echo -e "$(date) Database backed up to "$FINAL_BACKUP_DIR"$DATABASE".custom
+	mv $FINAL_BACKUP_DIR"$POSTGRES_DATABASE".custom.in_progress $FINAL_BACKUP_DIR"$POSTGRES_DATABASE".custom
+	echo -e "$(date) Database backed up to "$FINAL_BACKUP_DIR"$POSTGRES_DATABASE".custom
 fi
 
 ###################

@@ -1,11 +1,13 @@
 FROM postgres:9.4.1
 
+# these can be overridden in .docker-common.env but they are not set there by default
+ENV POSTGRES_USER=minmaster
+ENV POSTGRES_DATABASE=minmaster
+# POSTGRES_PASSWORD is set in .docker-common.env
+
 RUN apt-get update && \
 	apt-get install cron vim -y && \
   	rm -rf /var/lib/apt/lists/*
-
-ENV POSTGRES_USER=minmaster
-ENV POSTGRES_PASSWORD=overrideincompose
 
 RUN mkdir -p /docker-entrypoint-initdb.d && \
 	sed -i -r 's/exec \"\$@\"//' /docker-entrypoint.sh && \
