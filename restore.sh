@@ -1,5 +1,8 @@
 #!/bin/bash
 
+set -u # Treat unset variables as an error when substituting.
+PGPASSWORD=$POSTGRES_PASSWORD
+
 #restore from backup dir arg passed in
 DIR=$1
 
@@ -15,4 +18,4 @@ if [ -z "$DIR" ]; then
 	exit
 fi
 
-pg_restore --verbose --dbname=minmaster --clean --username=$POSTGRES_USER $DIR/minmaster.custom
+pg_restore --verbose --dbname=$POSTGRES_DATABASE --clean --username=$POSTGRES_USER $DIR/$POSTGRES_DATABASE.custom
