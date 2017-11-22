@@ -1,4 +1,5 @@
-0 8 * * * root /backup.sh 1>> /backups/backup.log 2>> /backups/backup.log
+#0 8 * * * root /backup.sh 1>> /backups/backup.log 2>> /backups/backup.log
+0 8 * * * root /backup.sh 2>&1 >> /backups/backup.log | tee /backups/stderr.log >> /backups/backup.log; if [ -s /backups/stderr.log ] ; then mailx -s "$(hostname) postgresql backup error" andrew.strominger@spidasoftware.com < /backups/stderr.log ; fi
 
 # Use 0 8 * * * for 8AM UTC every day: http://everytimezone.com/#2015-3-27,-240,cn3
 # Use * * * * * to backup every minute during development.
