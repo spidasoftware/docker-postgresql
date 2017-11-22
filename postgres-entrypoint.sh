@@ -2,9 +2,12 @@
 
 /docker-entrypoint.sh $@
 
+set -u # Treat unset variables as an error when substituting.
+
 if [ ! -f /.postgres_password_env_set ]; then
 	#Adding env vars to /etc/environment so cron job can use them
 	echo "PGDATA=$PGDATA" >> /etc/environment
+	echo "POSTGRES_DATABASE=$POSTGRES_DATABASE" >> /etc/environment
 	echo "POSTGRES_USER=$POSTGRES_USER" >> /etc/environment
 	echo "POSTGRES_PASSWORD=$POSTGRES_PASSWORD" >> /etc/environment
 	touch /.postgres_password_env_set
