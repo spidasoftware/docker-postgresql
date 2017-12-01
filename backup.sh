@@ -18,7 +18,9 @@ DAYS_TO_KEEP=7
 
 echo_and_mail_error() {
 	echo $1
-	echo $1 | mailx -s "$(hostname) mongodb backup error" andrew.strominger@spidasoftware.com
+	if [[ ! -z "$ALERT_EMAIL" ]]; then
+		echo $1 | mailx -s "$(hostname) mongodb backup error" $ALERT_EMAIL
+	fi
 }
 ###########################
 #### PRE-BACKUP CHECKS ####

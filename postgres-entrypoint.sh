@@ -18,7 +18,7 @@ if [ ! -f "$PGDATA/.max_connections_set" ]; then
 	touch "$PGDATA/.max_connections_set"
 fi
 
-if [[ "$BACKUP_JOBS_SENDGRID_API_KEY" != "" ]]; then
+if [[ ! -z "$BACKUP_JOBS_SENDGRID_API_KEY" ]]; then
 	echo [smtp.sendgrid.net]:2525 apikey:$BACKUP_JOBS_SENDGRID_API_KEY > /etc/postfix/sasl_passwd
 	postmap /etc/postfix/sasl_passwd
 	rm /etc/postfix/sasl_passwd
