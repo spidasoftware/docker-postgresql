@@ -1,4 +1,4 @@
-FROM postgres:9.4.1
+FROM postgres:9.4
 
 # these can be overridden in .docker-common.env but they are not set there by default
 ENV POSTGRES_USER=minmaster
