@@ -18,6 +18,18 @@ if [ ! -f "$PGDATA/.max_connections_set" ]; then
 	touch "$PGDATA/.max_connections_set"
 fi
 
+set +u # We're checking if it's set, don't treat unset variables as an error when substituting.
+if [[ ! -z "$BACKUP_JOBS_SENDGRID_API_KEY" ]]; then
+	echo [smtp.sendgrid.net]:2525 apikey:$BACKUP_JOBS_SENDGRID_API_KEY > /etc/postfix/sasl_passwd
+	postmap /etc/postfix/sasl_passwd
+	rm /etc/postfix/sasl_passwd
+	chmod 600 /etc/postfix/sasl_passwd.db
+	hostname > /etc/mailname
+
+	service postfix start
+fi
+set -u # Treat unset variables as an error when substituting.
+
 cron
 echo "$(date) container started. cron job: $(cat /etc/cron.d/postgres-backup-cron | head -1)" >> /backups/backup.log
 

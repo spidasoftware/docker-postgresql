@@ -16,6 +16,12 @@ HOSTNAME="localhost"
 # Number of days to keep daily backups
 DAYS_TO_KEEP=7
 
+echo_and_mail_error() {
+	echo $1
+	if [[ ! -z "$ALERT_EMAIL" ]]; then
+		echo $1 | mailx -s "$(hostname) mongodb backup error" $ALERT_EMAIL
+	fi
+}
 ###########################
 #### PRE-BACKUP CHECKS ####
 ###########################
@@ -26,6 +32,9 @@ fi
 
 # Delete daily backups 7 days old or more
 find $BACKUP_DIR -maxdepth 1 -mtime +$DAYS_TO_KEEP -name "pgdump-*" -exec rm -rf '{}' ';'
+if [[ $? -ne 0 ]]; then
+	echo_and_mail_error "error deleting old postgresql backups on $(hostname)"
+fi
 
 #If cron job running every minute during development, remove dirs older than 2 minutes
 if [[ $(cat /etc/cron.d/postgres-backup-cron | head -c 9) == "* * * * *" ]]; then
@@ -39,7 +48,7 @@ FINAL_BACKUP_DIR=$BACKUP_DIR"pgdump-`date +\%Y-\%m-\%d-\%I-\%M-\%S`/"
 echo "$(date) Making backup directory in $FINAL_BACKUP_DIR"
 
 if ! mkdir -p $FINAL_BACKUP_DIR; then
-	echo "$(date) Cannot create backup directory in $FINAL_BACKUP_DIR"
+	echo_and_mail_error "$(date) Cannot create backup directory in $FINAL_BACKUP_DIR"
 	exit 1;
 fi;
 
@@ -54,7 +63,7 @@ echo "$(date) Custom backup of $POSTGRES_DATABASE"
 # Will produce a custom-format backup
 # http://zevross.com/blog/2014/06/11/use-postgresqls-custom-format-to-efficiently-backup-and-restore-tables/
 if ! pg_dump -Fc -h $HOSTNAME -U $POSTGRES_USER $POSTGRES_DATABASE -f $FINAL_BACKUP_DIR"$POSTGRES_DATABASE".custom.in_progress; then
-	echo "[!!ERROR!!] Failed to produce custom backup database $POSTGRES_DATABASE"
+	echo_and_mail_error "[!!ERROR!!] Failed to produce custom backup database $POSTGRES_DATABASE on $(hostname)"
 else
 	mv $FINAL_BACKUP_DIR"$POSTGRES_DATABASE".custom.in_progress $FINAL_BACKUP_DIR"$POSTGRES_DATABASE".custom
 	echo -e "$(date) Database backed up to "$FINAL_BACKUP_DIR"$POSTGRES_DATABASE".custom
